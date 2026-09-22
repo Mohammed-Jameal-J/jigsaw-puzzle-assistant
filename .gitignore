@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+
+# Uploads (file-based storage — not source controlled)
+backend/uploads/
+uploads/*.jpg
+uploads/*.jpeg
+uploads/*.png
+uploads/*_ground_truth.json
+
+# Env
+.env
+
+# OS/editor
+.DS_Store
+*.swp

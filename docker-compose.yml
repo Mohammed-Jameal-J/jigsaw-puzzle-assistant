@@ -1,0 +1,13 @@
+services:
+  puzzle-app:
+    build: .
+    ports:
+      - "8531:8000"
+    volumes:
+      - puzzle-storage:/app/backend/uploads
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+volumes:
+  puzzle-storage:

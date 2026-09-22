@@ -1,0 +1,19 @@
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+opencv-python-headless==4.8.1.78
+# numpy pinned to the 1.26.x line, not just floored: 1.24.3 (the original
+# pin) has no Python 3.12 wheel and fails to build from source on 3.12 (a
+# real, reproduced failure — pkgutil.ImpImporter was removed from 3.12's
+# stdlib). But numpy>=2.0 breaks opencv-python-headless==4.8.1.78, which
+# was compiled against numpy's 1.x C-API ("_ARRAY_API not found" at import
+# — also reproduced, not theoretical). 1.26.4 has 3.9-3.12 wheels and stays
+# on the 1.x ABI.
+numpy>=1.26.4,<2.0
+pillow==10.1.0
+scipy>=1.11.4
+pydantic==2.5.0
+python-dotenv==1.0.0
+
+# dev/test only
+pytest==7.4.3
