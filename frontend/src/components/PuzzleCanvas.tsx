@@ -150,7 +150,7 @@ export default function PuzzleCanvas({ imageUrl, pieces, onPieceClick }: PuzzleC
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
         <p style={{ fontSize: 13, color: "#6b7280" }}>
-          Drag a piece to move it, click to inspect it — showing {shownCount} of {pieces.length} pieces.
+          Drag a piece to move it, click to inspect it, showing {shownCount} of {pieces.length} pieces.
         </p>
         <button className="btn btn-secondary" onClick={resetPositions} style={{ padding: "6px 14px", fontSize: 13 }}>
           Reset positions

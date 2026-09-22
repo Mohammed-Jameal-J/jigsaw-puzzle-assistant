@@ -80,7 +80,7 @@ export default function Results() {
         <StatCard label="Pieces detected" value={summary.pieces_count} />
         <StatCard
           label="Processing time"
-          value={summary.processing_time_ms ? `${Math.round(summary.processing_time_ms)} ms` : "—"}
+          value={summary.processing_time_ms ? `${Math.round(summary.processing_time_ms)} ms` : "N/A"}
         />
         <StatCard label="Corners" value={summary.corner_count} />
         <StatCard label="Border pieces" value={summary.border_count} />

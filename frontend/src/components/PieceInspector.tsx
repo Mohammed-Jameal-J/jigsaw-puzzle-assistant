@@ -1,3 +1,4 @@
+import { ArrowDownToLine, ArrowUpFromLine, Minus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { apiErrorMessage, getPiece } from "../services/api";
 import type { PieceMetadata } from "../types/puzzle";
@@ -8,14 +9,20 @@ interface PieceInspectorProps {
   onClose: () => void;
 }
 
-const EDGE_ICON: Record<string, string> = { tab: "▲", hole: "▼", flat: "▬", unknown: "?" };
+const EDGE_ICON: Record<string, JSX.Element> = {
+  tab: <ArrowUpFromLine size={14} aria-hidden="true" />,
+  hole: <ArrowDownToLine size={14} aria-hidden="true" />,
+  flat: <Minus size={14} aria-hidden="true" />,
+  unknown: <span aria-hidden="true">?</span>,
+};
 
 function EdgeRow({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--light-gray)" }}>
       <span style={{ color: "#6b7280", fontSize: 13 }}>{label}</span>
-      <span style={{ fontWeight: 600, fontSize: 13 }}>
-        {EDGE_ICON[value] ?? "?"} {value}
+      <span style={{ fontWeight: 600, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }}>
+        {EDGE_ICON[value] ?? <span aria-hidden="true">?</span>}
+        <span>{value}</span>
       </span>
     </div>
   );

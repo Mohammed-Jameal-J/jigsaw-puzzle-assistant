@@ -6,13 +6,15 @@ Phase 4/5/6 (border/corner, edge classification, rotation refinement) are
 wired into /analyze's response shape already but return "unknown" /
 placeholder values until those services are built next.
 """
-from __future__ import annotations
-
 import base64
+import re
 import time
 
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, Request, UploadFile, File
 from fastapi.responses import FileResponse
+
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from app.core.config import settings
 from app.core.logging import logger
@@ -36,6 +38,27 @@ from app.services.image_processor import (
 from app.services.piece_detector import detect_pieces, save_debug_images, save_piece_crops
 
 router = APIRouter(prefix=settings.API_V1_PREFIX)
+limiter = Limiter(key_func=get_remote_address)
+PUZZLE_ID_PATTERN = re.compile(r"^[a-f0-9]{12}$")
+PIECE_ID_PATTERN = re.compile(r"^P[0-9]{4}$")
+
+
+def _validate_puzzle_id(puzzle_id: str) -> str:
+    if not PUZZLE_ID_PATTERN.fullmatch(puzzle_id):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid puzzle_id '{puzzle_id}'. Expected 12 lowercase hex characters.",
+        )
+    return puzzle_id
+
+
+def _validate_piece_id(piece_id: str) -> str:
+    if not PIECE_ID_PATTERN.fullmatch(piece_id):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid piece_id '{piece_id}'. Expected format P####.",
+        )
+    return piece_id
 
 
 def _get_record_or_404(puzzle_id: str) -> PuzzleRecord:
@@ -48,7 +71,8 @@ def _get_record_or_404(puzzle_id: str) -> PuzzleRecord:
 # ---------- Phase 1: Upload ----------
 
 @router.post("/puzzle/upload", response_model=UploadResponse)
-async def upload_puzzle(image: UploadFile = File(...)) -> UploadResponse:
+@limiter.limit("10/minute")
+async def upload_puzzle(request: Request, image: UploadFile = File(...)) -> UploadResponse:
     try:
         data = await validate_and_read_upload(image)
         img, width, height = decode_and_validate_image(data)
@@ -82,6 +106,7 @@ async def upload_puzzle(image: UploadFile = File(...)) -> UploadResponse:
 
 @router.post("/puzzle/{puzzle_id}/analyze", response_model=AnalyzeResponse)
 async def analyze_puzzle(puzzle_id: str, body: AnalyzeRequest) -> AnalyzeResponse:
+    puzzle_id = _validate_puzzle_id(puzzle_id)
     record = _get_record_or_404(puzzle_id)
     record.status = PuzzleStatus.PROCESSING.value
     storage.save_record(record)
@@ -124,6 +149,7 @@ async def analyze_puzzle(puzzle_id: str, body: AnalyzeRequest) -> AnalyzeRespons
 
 @router.get("/puzzle/{puzzle_id}", response_model=PuzzleSummary)
 async def get_puzzle(puzzle_id: str) -> PuzzleSummary:
+    puzzle_id = _validate_puzzle_id(puzzle_id)
     record = _get_record_or_404(puzzle_id)
     return PuzzleSummary(
         puzzle_id=record.puzzle_id,
@@ -141,6 +167,7 @@ async def get_puzzle(puzzle_id: str) -> PuzzleSummary:
 
 @router.get("/puzzle/{puzzle_id}/image")
 async def get_original_image(puzzle_id: str) -> FileResponse:
+    puzzle_id = _validate_puzzle_id(puzzle_id)
     """
     Serves the original uploaded photo. Not in the original spec's endpoint
     list, but small and useful: it lets the frontend render piece thumbnails
@@ -152,12 +179,15 @@ async def get_original_image(puzzle_id: str) -> FileResponse:
 
 @router.get("/puzzle/{puzzle_id}/pieces")
 async def list_pieces(puzzle_id: str) -> list[dict]:
+    puzzle_id = _validate_puzzle_id(puzzle_id)
     record = _get_record_or_404(puzzle_id)
     return record.pieces
 
 
 @router.get("/puzzle/{puzzle_id}/pieces/{piece_id}", response_model=PieceDetailResponse)
 async def get_piece(puzzle_id: str, piece_id: str) -> PieceDetailResponse:
+    puzzle_id = _validate_puzzle_id(puzzle_id)
+    piece_id = _validate_piece_id(piece_id)
     record = _get_record_or_404(puzzle_id)
     piece = next((p for p in record.pieces if p["piece_id"] == piece_id), None)
     if piece is None:
@@ -175,6 +205,7 @@ async def get_piece(puzzle_id: str, piece_id: str) -> PieceDetailResponse:
 
 @router.get("/puzzle/{puzzle_id}/debug", response_model=DebugResponse)
 async def get_debug(puzzle_id: str) -> DebugResponse:
+    puzzle_id = _validate_puzzle_id(puzzle_id)
     record = _get_record_or_404(puzzle_id)
     debug_dir = storage.debug_dir(puzzle_id)
 

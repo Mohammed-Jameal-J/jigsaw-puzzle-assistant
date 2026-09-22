@@ -29,7 +29,7 @@ export default function Home() {
       <div style={{ textAlign: "center", marginBottom: 32 }}>
         <h1 style={{ color: "#fff", marginBottom: 10 }}>Solve your puzzle, piece by piece</h1>
         <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 16 }}>
-          Upload a photo of your scattered jigsaw pieces — we'll detect each one, tag its
+          Upload a photo of your scattered jigsaw pieces. We will detect each one, tag its
           edges, and figure out which pieces make up the border.
         </p>
       </div>

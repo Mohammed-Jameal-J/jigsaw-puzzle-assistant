@@ -39,7 +39,7 @@ export default function PieceThumb({ piece, image, onClick }: PieceThumbProps) {
   return (
     <button
       onClick={onClick}
-      title={`${piece.piece_id} — ${piece.classification}`}
+      title={`${piece.piece_id} · ${piece.classification}`}
       style={{
         border: `2px solid ${CLASSIFICATION_COLORS[piece.classification]}`,
         borderRadius: 6,

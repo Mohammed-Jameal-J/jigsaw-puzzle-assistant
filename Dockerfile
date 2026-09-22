@@ -33,7 +33,9 @@ COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 
 # File-based storage lives here — mounted as a named volume in
 # docker-compose.yml so uploads/pieces survive container restarts.
-RUN mkdir -p /app/backend/uploads
+RUN groupadd --system appuser && useradd --system --gid appuser --create-home --home-dir /home/appuser --shell /bin/bash appuser \
+    && mkdir -p /app/backend/uploads \
+    && chown -R appuser:appuser /app /home/appuser
 ENV UPLOADS_DIR=/app/backend/uploads
 ENV PYTHONUNBUFFERED=1
 
@@ -43,4 +45,5 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 WORKDIR /app/backend
+USER appuser
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

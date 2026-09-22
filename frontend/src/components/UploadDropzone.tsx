@@ -1,3 +1,4 @@
+import { ImagePlus } from "lucide-react";
 import { useRef, useState, type DragEvent } from "react";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/jpg"];
@@ -56,13 +57,13 @@ export default function UploadDropzone({ onFileSelected, disabled }: UploadDropz
           opacity: disabled ? 0.6 : 1,
         }}
       >
-        <div style={{ fontSize: 40, marginBottom: 12 }} aria-hidden="true">
-          📷
+        <div style={{ marginBottom: 12, display: "flex", justifyContent: "center", color: "#6b7280" }} aria-hidden="true">
+          <ImagePlus size={40} />
         </div>
         <p style={{ fontWeight: 600, fontSize: 16, marginBottom: 6 }}>
           Drop a photo of your puzzle pieces here
         </p>
-        <p style={{ color: "#6b7280", fontSize: 14 }}>or click to browse — JPEG or PNG</p>
+        <p style={{ color: "#6b7280", fontSize: 14 }}>or click to browse, JPEG or PNG</p>
         <input
           ref={inputRef}
           type="file"

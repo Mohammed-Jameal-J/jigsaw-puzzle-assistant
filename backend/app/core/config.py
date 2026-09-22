@@ -8,6 +8,15 @@ import os
 from pathlib import Path
 
 
+def _parse_allowed_origins(raw_value: str | None) -> list[str]:
+    fallback = ["http://localhost:5173", "http://localhost:8000"]
+    if not raw_value:
+        return fallback
+
+    origins = [origin.strip() for origin in raw_value.split(",") if origin.strip()]
+    return origins or fallback
+
+
 class Settings:
     # --- App ---
     APP_NAME: str = "Jigsaw Puzzle Assistant"
@@ -34,7 +43,8 @@ class Settings:
     FLAT_EDGE_STRAIGHTNESS_THRESHOLD: float = 0.02  # normalized deviation from a straight line
 
     # --- CORS ---
-    CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:8000", "*"]
+    ALLOWED_ORIGINS: list[str] = _parse_allowed_origins(os.getenv("ALLOWED_ORIGINS"))
+    CORS_ORIGINS: list[str] = ALLOWED_ORIGINS
 
     def ensure_dirs(self) -> None:
         self.UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
